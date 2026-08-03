@@ -13,10 +13,15 @@ tien_gui = st.number_input(
 )
 
 lai_suat = st.number_input(
-    "📈 Lãi suất (%/năm)",
+    "📈 Lãi suất (%)",
     min_value=0.0,
     value=5.0,
     step=0.1
+)
+
+don_vi_lai = st.selectbox(
+    "Đơn vị lãi suất",
+    ["Theo năm", "Theo tháng", "Theo ngày"]
 )
 
 ngay_gui = st.date_input("📅 Ngày gửi", date.today())
@@ -34,7 +39,12 @@ if ngay_dao_han > ngay_gui:
     # Tổng số ngày thực tế
     tong_ngay = (ngay_dao_han - ngay_gui).days
 
+   if don_vi_lai == "Theo năm":
     r = (lai_suat / 100) / 365
+elif don_vi_lai == "Theo tháng":
+    r = (lai_suat / 100) / 30
+else:  # Theo ngày
+    r = lai_suat / 100
 
     # Lãi đơn
     tong_lai_don = tien_gui * (1 + r * tong_ngay)
