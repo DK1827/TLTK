@@ -18,47 +18,44 @@ tien_gui = st.number_input(
     format="%.0f"
 )
 
-# Loại tiền gửi
 loai_gui = st.selectbox(
     "🏦 Loại tiền gửi",
     ["Có kỳ hạn", "Không kỳ hạn"]
 )
 
-# Lãi suất
-if loai_gui == "Có kỳ hạn":
-    lai_suat = st.number_input(
-        "📈 Lãi suất kỳ hạn (%)",
-        min_value=0.0,
-        value=5.0,
-        step=0.1
-    )
-else:
-    lai_suat = st.number_input(
-        "📈 Lãi suất không kỳ hạn (%)",
-        min_value=0.0,
-        value=0.2,
-        step=0.01
-    )
-
-# Đơn vị lãi suất
-don_vi_lai = st.selectbox(
-    "📌 Đơn vị lãi suất",
-    ["Theo năm", "Theo tháng", "Theo ngày"]
+lai_suat_co_ky_han = st.number_input(
+    "📈 Lãi suất có kỳ hạn (%)",
+    min_value=0.0,
+    value=5.0,
+    step=0.1
 )
 
-# Ngày gửi
+lai_suat_khong_ky_han = st.number_input(
+    "📈 Lãi suất không kỳ hạn (%)",
+    min_value=0.0,
+    value=0.2,
+    step=0.01
+)
+
+don_vi_lai = st.selectbox(
+    "📌 Đơn vị lãi suất",
+    [
+        "Theo năm",
+        "Theo tháng",
+        "Theo ngày"
+    ]
+)
+
 ngay_gui = st.date_input(
     "📅 Ngày gửi",
     value=date.today()
 )
 
-# Ngày đến hạn
 ngay_den_han = st.date_input(
     "📅 Ngày đến hạn",
     value=date.today()
 )
 
-# Ngày rút tiền
 ngay_rut_tien = st.date_input(
     "💵 Ngày rút tiền",
     value=ngay_den_han
@@ -70,7 +67,6 @@ ngay_rut_tien = st.date_input(
 
 if ngay_rut_tien >= ngay_gui:
 
-    # Tính thời gian thực tế từ ngày gửi đến ngày rút
     rd = relativedelta(ngay_rut_tien, ngay_gui)
 
     nam = rd.years
@@ -79,23 +75,41 @@ if ngay_rut_tien >= ngay_gui:
 
     tong_ngay = (ngay_rut_tien - ngay_gui).days
 
-    # Nếu gửi có kỳ hạn nhưng rút trước hạn
-    if loai_gui == "Có kỳ hạn" and ngay_rut_tien < ngay_den_han:
-        st.warning("⚠️ Bạn rút tiền trước ngày đến hạn. Áp dụng lãi suất không kỳ hạn.")
+    # ==========================
+    # XÁC ĐỊNH LÃI SUẤT ÁP DỤNG
+    # ==========================
 
-        # Lãi suất không kỳ hạn mặc định 0.2%/năm
-        r = (0.2 / 100) / 365
+    if loai_gui == "Có kỳ hạn":
 
-    else:
-        # Quy đổi lãi suất
-        if don_vi_lai == "Theo năm":
-            r = (lai_suat / 100) / 365
+        if ngay_rut_tien < ngay_den_han:
 
-        elif don_vi_lai == "Theo tháng":
-            r = (lai_suat / 100) / 30
+            st.warning("⚠️ Rút trước hạn - áp dụng lãi suất không kỳ hạn.")
+
+            lai_suat_ap_dung = lai_suat_khong_ky_han
+            ten_lai = "Không kỳ hạn"
 
         else:
-            r = lai_suat / 100
+
+            lai_suat_ap_dung = lai_suat_co_ky_han
+            ten_lai = "Có kỳ hạn"
+
+    else:
+
+        lai_suat_ap_dung = lai_suat_khong_ky_han
+        ten_lai = "Không kỳ hạn"
+
+    # ==========================
+    # QUY ĐỔI LÃI SUẤT
+    # ==========================
+
+    if don_vi_lai == "Theo năm":
+        r = (lai_suat_ap_dung / 100) / 365
+
+    elif don_vi_lai == "Theo tháng":
+        r = (lai_suat_ap_dung / 100) / 30
+
+    else:
+        r = lai_suat_ap_dung / 100
 
     # ==========================
     # TÍNH LÃI
@@ -123,7 +137,8 @@ if ngay_rut_tien >= ngay_gui:
 
     st.info(f"⏳ Tổng số ngày gửi: {tong_ngay} ngày")
 
-    st.write(f"📈 Lãi suất áp dụng: **{lai_suat}% ({don_vi_lai})**")
+    st.write(f"📌 Loại lãi suất áp dụng: **{ten_lai}**")
+    st.write(f"📈 Lãi suất áp dụng: **{lai_suat_ap_dung:.2f}% ({don_vi_lai})**")
 
     col1, col2 = st.columns(2)
 
