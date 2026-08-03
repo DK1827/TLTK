@@ -18,11 +18,7 @@ tien_gui = st.number_input(
     format="%.0f"
 )
 
-loai_gui = st.selectbox(
-    "🏦 Loại tiền gửi",
-    ["Có kỳ hạn", "Không kỳ hạn"]
-)
-
+# Lãi suất có kỳ hạn
 lai_suat_co_ky_han = st.number_input(
     "📈 Lãi suất có kỳ hạn (%)",
     min_value=0.0,
@@ -30,6 +26,7 @@ lai_suat_co_ky_han = st.number_input(
     step=0.1
 )
 
+# Lãi suất không kỳ hạn
 lai_suat_khong_ky_han = st.number_input(
     "📈 Lãi suất không kỳ hạn (%)",
     min_value=0.0,
@@ -37,6 +34,7 @@ lai_suat_khong_ky_han = st.number_input(
     step=0.01
 )
 
+# Đơn vị lãi suất
 don_vi_lai = st.selectbox(
     "📌 Đơn vị lãi suất",
     [
@@ -46,16 +44,19 @@ don_vi_lai = st.selectbox(
     ]
 )
 
+# Ngày gửi
 ngay_gui = st.date_input(
     "📅 Ngày gửi",
     value=date.today()
 )
 
+# Ngày đến hạn
 ngay_den_han = st.date_input(
     "📅 Ngày đến hạn",
     value=date.today()
 )
 
+# Ngày rút tiền
 ngay_rut_tien = st.date_input(
     "💵 Ngày rút tiền",
     value=ngay_den_han
@@ -79,24 +80,17 @@ if ngay_rut_tien >= ngay_gui:
     # XÁC ĐỊNH LÃI SUẤT ÁP DỤNG
     # ==========================
 
-    if loai_gui == "Có kỳ hạn":
+    if ngay_rut_tien < ngay_den_han:
 
-        if ngay_rut_tien < ngay_den_han:
-
-            st.warning("⚠️ Rút trước hạn - áp dụng lãi suất không kỳ hạn.")
-
-            lai_suat_ap_dung = lai_suat_khong_ky_han
-            ten_lai = "Không kỳ hạn"
-
-        else:
-
-            lai_suat_ap_dung = lai_suat_co_ky_han
-            ten_lai = "Có kỳ hạn"
-
-    else:
+        st.warning("⚠️ Rút trước hạn - áp dụng lãi suất không kỳ hạn.")
 
         lai_suat_ap_dung = lai_suat_khong_ky_han
         ten_lai = "Không kỳ hạn"
+
+    else:
+
+        lai_suat_ap_dung = lai_suat_co_ky_han
+        ten_lai = "Có kỳ hạn"
 
     # ==========================
     # QUY ĐỔI LÃI SUẤT
@@ -112,11 +106,15 @@ if ngay_rut_tien >= ngay_gui:
         r = lai_suat_ap_dung / 100
 
     # ==========================
-    # TÍNH LÃI
+    # TÍNH LÃI ĐƠN
     # ==========================
 
     tong_lai_don = tien_gui * (1 + r * tong_ngay)
     lai_don = tong_lai_don - tien_gui
+
+    # ==========================
+    # TÍNH LÃI KÉP
+    # ==========================
 
     tong_lai_kep = tien_gui * ((1 + r) ** tong_ngay)
     lai_kep = tong_lai_kep - tien_gui
@@ -124,8 +122,6 @@ if ngay_rut_tien >= ngay_gui:
     # ==========================
     # HIỂN THỊ KẾT QUẢ
     # ==========================
-
-    st.success(f"🏦 Loại tiền gửi: {loai_gui}")
 
     st.success(
         f"📅 Thời gian gửi: {nam} năm {thang} tháng {ngay} ngày"
